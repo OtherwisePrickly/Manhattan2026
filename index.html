@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1494,13 +1495,13 @@
     document.body.classList.remove('locked');
     if (animate) {
       gate.classList.add('unlocked');
-      // Fully remove the gate node after the fade so it can't intercept input
       setTimeout(() => { if (gate && gate.parentNode) gate.parentNode.removeChild(gate); }, 900);
     } else {
       gate.style.display = 'none';
     }
-    // Re-init scroll-driven things now that the page is fully visible
+    // Submitting the gate IS a user gesture, so use it to unlock iOS video seeking.
     setTimeout(() => {
+      try { if (typeof primeVideo === 'function') primeVideo(); } catch (e) {}
       try { buildZigzag(); onScroll(); } catch (e) {}
     }, 50);
   }
@@ -1567,6 +1568,7 @@
 
   let videoDuration = 0;
   let videoReady = false;
+  let videoPrimed = false; // iOS Safari requires a user-gesture play() before frames will paint during seek
   let targetTime = 0;
   let currentTime = 0;
   let rafId = null;
@@ -1578,14 +1580,38 @@
     videoDuration = heroVideoEl.duration || 0;
     videoReady = true;
     heroVideoEl.pause();
-    // Initial seek to 0
     try { heroVideoEl.currentTime = 0; } catch (e) {}
     onScroll();
   });
 
-  // Some browsers need a kickstart for seeking to work — call play() then immediately pause()
   heroVideoEl.addEventListener('canplay', () => {
     heroVideoEl.pause();
+  });
+
+  // Prime the video from a user gesture. Without this, iOS Safari refuses to paint
+  // frames during currentTime seeking, leaving the hero stuck on its first frame.
+  function primeVideo() {
+    if (videoPrimed) return;
+    videoPrimed = true;
+    const p = heroVideoEl.play();
+    if (p && typeof p.then === 'function') {
+      p.then(() => {
+        // Pause immediately — we only needed the play() to satisfy iOS
+        heroVideoEl.pause();
+        try { heroVideoEl.currentTime = targetTime || 0; } catch (e) {}
+      }).catch(() => {
+        // play() rejected — likely no user gesture yet. Try again on next touch.
+        videoPrimed = false;
+      });
+    } else {
+      // Older browsers — play() returned undefined
+      try { heroVideoEl.pause(); } catch (e) {}
+    }
+  }
+
+  // Hook prime to any first user gesture as a safety net
+  ['touchstart', 'pointerdown', 'click', 'keydown'].forEach(evt => {
+    window.addEventListener(evt, primeVideo, { once: false, passive: true });
   });
 
   // Smoothly lerp video.currentTime toward targetTime each frame
