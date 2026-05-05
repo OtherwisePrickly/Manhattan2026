@@ -269,78 +269,6 @@
   .reveal.delay-2 { transition-delay: 0.2s; }
   .reveal.delay-3 { transition-delay: 0.3s; }
 
-  /* ============ MOBILE PROGRESS BAR ============ */
-  /* Shown only on mobile (where the zigzag is hidden). Thin bar at top of viewport
-     with section nodes that light up as the user passes each one. */
-  .m-progress {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    z-index: 101; /* above nav so it's never covered */
-    pointer-events: none;
-    background: rgba(255, 255, 255, 0.05);
-  }
-  .m-progress-fill {
-    position: absolute;
-    top: 0; left: 0;
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, var(--orange), var(--orange-bright));
-    box-shadow: 0 0 10px rgba(240, 108, 0, 0.6);
-    transition: width 0.12s linear;
-  }
-  .m-progress-nodes {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
-  .m-progress-node {
-    position: absolute;
-    top: 50%;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--bg);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    transform: translate(-50%, -50%);
-    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-  }
-  .m-progress-node.active {
-    background: var(--orange-bright);
-    border-color: var(--orange-bright);
-    box-shadow: 0 0 8px rgba(240, 108, 0, 0.7);
-    transform: translate(-50%, -50%) scale(1.4);
-  }
-  .m-progress-label {
-    position: absolute;
-    top: 8px;
-    right: 18px;
-    font-size: 9px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    background: rgba(11, 11, 13, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 4px 10px;
-    border-radius: 100px;
-    border: 1px solid var(--line);
-    opacity: 0;
-    transform: translateY(-4px);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    pointer-events: none;
-  }
-  .m-progress-label.show {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  @media (max-width: 900px) {
-    .m-progress { display: block; }
-  }
-
   /* ============ ZIGZAG PROGRESS LINE ============ */
   .progress-track {
     position: absolute;
@@ -836,7 +764,19 @@
     footer .foot-mark img.logo-aws { height: 30px; }
     footer .foot-mark .x { font-size: 18px; }
 
-    .progress-track { display: none; }
+    /* On mobile, keep the zigzag but make it a subtle background trace */
+    .progress-track { z-index: 0; opacity: 0.55; }
+    .progress-track .track-bg { stroke-width: 1.25; stroke: rgba(255, 255, 255, 0.04); }
+    .progress-track .track-fill {
+      stroke-width: 1.5;
+      filter: none; /* no glow on mobile — keeps it quiet behind content */
+      opacity: 0.7;
+    }
+    .progress-dot-outer { r: 9; opacity: 0.5; }
+    .progress-dot-inner { r: 4; }
+    .progress-node { r: 4; }
+    /* Sections sit above the zigzag */
+    .section { position: relative; z-index: 1; }
   }
 
   @media (max-width: 480px) {
@@ -1105,13 +1045,6 @@
       <strong>AWS Builder Studio · Manhattan</strong>
     </div>
   </div>
-</div>
-
-<!-- Mobile-only top progress bar (zigzag handles desktop) -->
-<div class="m-progress" id="mProgress" aria-hidden="true">
-  <div class="m-progress-fill" id="mProgressFill"></div>
-  <div class="m-progress-nodes" id="mProgressNodes"></div>
-  <div class="m-progress-label" id="mProgressLabel"></div>
 </div>
 
 <nav class="nav" id="nav">
@@ -1581,7 +1514,7 @@
     // Submitting the gate IS a user gesture, so use it to unlock iOS video seeking.
     setTimeout(() => {
       try { if (typeof primeVideo === 'function') primeVideo(); } catch (e) {}
-      try { buildZigzag(); buildMobileProgress(); onScroll(); } catch (e) {}
+      try { buildZigzag(); onScroll(); } catch (e) {}
     }, 50);
   }
 
@@ -1741,7 +1674,6 @@
     else nav.classList.remove('scrolled');
 
     updateProgressLine();
-    updateMobileProgress();
   }
 
   // ============ REVEAL ON SCROLL ============
@@ -1755,72 +1687,6 @@
     });
   }, { threshold: 0.15, rootMargin: '0px 0px -80px 0px' });
   reveals.forEach(el => revealObserver.observe(el));
-
-  // ============ MOBILE PROGRESS BAR ============
-  const mProgressFill = document.getElementById('mProgressFill');
-  const mProgressNodes = document.getElementById('mProgressNodes');
-  const mProgressLabel = document.getElementById('mProgressLabel');
-  let mProgressSections = [];
-
-  function buildMobileProgress() {
-    const sections = main.querySelectorAll('.section');
-    if (!sections.length || !mProgressNodes) return;
-    const docH = (document.documentElement.scrollHeight || 0) - window.innerHeight;
-    if (docH <= 0) return;
-
-    mProgressNodes.innerHTML = '';
-    mProgressSections = [];
-
-    sections.forEach((section, i) => {
-      const headEl = section.querySelector('.section-head');
-      const rect = headEl ? headEl.getBoundingClientRect() : section.getBoundingClientRect();
-      const absTop = rect.top + window.scrollY - 80;
-      const pct = Math.max(0, Math.min(100, (absTop / docH) * 100));
-
-      const node = document.createElement('div');
-      node.className = 'm-progress-node';
-      node.style.left = pct + '%';
-
-      const numEl = section.querySelector('.section-num');
-      const numText = numEl ? numEl.textContent.trim() : '';
-      const label = numText.includes('·') ? numText.split('·').slice(1).join('·').trim() : numText;
-
-      mProgressNodes.appendChild(node);
-      mProgressSections.push({ absTop, node, label });
-    });
-  }
-
-  function updateMobileProgress() {
-    if (!mProgressFill) return;
-    const docH = (document.documentElement.scrollHeight || 0) - window.innerHeight;
-    if (docH <= 0) return;
-    const y = window.scrollY;
-    const pct = Math.max(0, Math.min(100, (y / docH) * 100));
-    mProgressFill.style.width = pct + '%';
-
-    let activeLabel = '';
-    for (const s of mProgressSections) {
-      if (y + 100 >= s.absTop) {
-        s.node.classList.add('active');
-        activeLabel = s.label;
-      } else {
-        s.node.classList.remove('active');
-      }
-    }
-
-    if (mProgressLabel) {
-      const heroH = heroSection ? heroSection.offsetHeight : 0;
-      // Show the label once we've moved out of the hero
-      if (y > heroH * 0.7 && activeLabel) {
-        if (mProgressLabel.textContent !== activeLabel) {
-          mProgressLabel.textContent = activeLabel;
-        }
-        mProgressLabel.classList.add('show');
-      } else {
-        mProgressLabel.classList.remove('show');
-      }
-    }
-  }
 
   // ============ ZIGZAG PROGRESS LINE ============
   const main = document.getElementById('main');
@@ -1934,7 +1800,6 @@
   // ============ INIT ============
   function init() {
     buildZigzag();
-    buildMobileProgress();
     onScroll();
   }
 
@@ -1943,7 +1808,6 @@
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
       buildZigzag();
-      buildMobileProgress();
     }, 150);
   });
 
