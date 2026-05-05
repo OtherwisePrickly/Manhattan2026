@@ -1168,7 +1168,7 @@
         <div class="agenda-time"><small>09:30 – 10:00</small>Opening</div>
         <div>
           <div class="agenda-title-row">Welcome and Scene Setting</div>
-          <div class="agenda-desc">Position AWS as strategic innovation partner — speed of delivery, understanding of retail margins. Contrast with Microsoft AI commitments.</div>
+          <div class="agenda-desc">Why we've pulled this day together. A pan-Amazon perspective on where AI is moving in retail, combined with the speed of delivery and understanding of retail margins your account team brings every day — the frame for everything that follows.</div>
         </div>
         <div class="agenda-presenter"><span>Hosted by</span>Duncan Stewart<br/>James Wilkinson</div>
       </div>
@@ -1626,13 +1626,30 @@
     window.addEventListener(evt, primeVideo, { once: false, passive: true });
   });
 
-  // Smoothly lerp video.currentTime toward targetTime each frame
+  // Per-frame, advance currentTime toward targetTime — but never faster than the
+  // video's natural 1x playback rate. So fast scrolls don't fly through the clip:
+  // the video keeps playing at real speed and "catches up" to the scroll position.
+  const MAX_RATE = 1.0; // multiples of original speed (1.0 = real-time)
+  let lastFrameTime = performance.now();
+
   function tickVideo() {
+    const now = performance.now();
+    // dt in seconds, capped to avoid huge jumps after a tab is backgrounded
+    const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
+    lastFrameTime = now;
+
     if (videoReady) {
-      // Ease-toward target for smoother seeking on heavy keyframes
+      const maxStep = MAX_RATE * dt;
       const delta = targetTime - currentTime;
-      currentTime += delta * 0.18;
-      if (Math.abs(delta) < 0.005) currentTime = targetTime;
+
+      if (Math.abs(delta) <= maxStep) {
+        // Close enough — snap to target so slow scrolls feel exactly attached
+        currentTime = targetTime;
+      } else {
+        // Too far — advance at the rate cap (forward or reverse)
+        currentTime += Math.sign(delta) * maxStep;
+      }
+
       try {
         if (Math.abs(heroVideoEl.currentTime - currentTime) > 0.01) {
           heroVideoEl.currentTime = Math.max(0, Math.min(currentTime, videoDuration - 0.05));
