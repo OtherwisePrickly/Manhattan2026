@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,10 +82,11 @@
   }
 
   /* ============ HERO ============ */
-  /* Hero is taller than viewport so video plays across a longer scroll distance */
+  /* Hero is just over one viewport so content slides up over the still-visible
+     video shortly after scroll begins — no long black gap before content arrives. */
   .hero {
     position: relative;
-    height: 250vh;
+    height: 160vh;
     width: 100%;
   }
   .hero-video-wrap {
@@ -212,10 +212,13 @@
   }
 
   /* ============ MAIN CONTENT ============ */
+  /* main's top fades in from transparent so the countdown rides up OVER the
+     still-visible video — you see the eyebrow and numerals against the video
+     before the solid page background takes over below. */
   main {
     position: relative;
-    background: var(--bg);
     z-index: 5;
+    background: linear-gradient(180deg, rgba(11, 11, 13, 0) 0px, rgba(11, 11, 13, 0.55) 200px, var(--bg) 380px);
   }
 
   .section {
@@ -268,6 +271,105 @@
   .reveal.delay-1 { transition-delay: 0.1s; }
   .reveal.delay-2 { transition-delay: 0.2s; }
   .reveal.delay-3 { transition-delay: 0.3s; }
+
+  /* ============ COUNTDOWN ============ */
+  .countdown-section {
+    position: relative;
+    padding: 140px 40px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .countdown-eyebrow {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--orange-bright);
+    margin-bottom: 36px;
+    opacity: 0.95;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.7);
+  }
+  .countdown-grid {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 28px;
+    margin: 0 auto 28px;
+    max-width: 760px;
+  }
+  .countdown-cell {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+  }
+  .countdown-cell + .countdown-cell::before {
+    content: ":";
+    position: absolute;
+    left: -18px;
+    top: 6px;
+    font-family: var(--serif);
+    font-size: clamp(40px, 7vw, 80px);
+    color: var(--text-dim);
+    opacity: 0.35;
+    line-height: 1;
+  }
+  .countdown-num {
+    font-family: var(--serif);
+    font-size: clamp(56px, 9vw, 104px);
+    line-height: 1;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -2px;
+    text-shadow: 0 2px 28px rgba(0, 0, 0, 0.7);
+  }
+  .countdown-label {
+    margin-top: 12px;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .countdown-meta {
+    font-size: 13px;
+    color: var(--text-mid);
+    letter-spacing: 0.5px;
+    margin-top: 18px;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .countdown-meta strong {
+    color: var(--orange-bright);
+    font-weight: 500;
+  }
+  @media (max-width: 640px) {
+    .countdown-section { padding: 90px 22px 50px; }
+    .countdown-eyebrow { margin-bottom: 24px; }
+    .countdown-grid { gap: 14px; max-width: 100%; }
+    .countdown-cell + .countdown-cell::before { left: -10px; font-size: 32px; top: 4px; }
+    .countdown-num { font-size: 40px; letter-spacing: -1px; }
+    .countdown-label { font-size: 9px; letter-spacing: 2px; margin-top: 8px; }
+    .countdown-meta { font-size: 12px; padding-top: 14px; margin-top: 14px; }
+  }
+
+  /* ============ ACTIVE SECTION HIGHLIGHT ============ */
+  /* Section number chip lights up when the section is in the viewport center */
+  .section .section-num,
+  .section .section-title em {
+    transition: background 0.5s ease, color 0.5s ease, border-color 0.5s ease,
+                box-shadow 0.5s ease, text-shadow 0.5s ease;
+  }
+  .section.section-active .section-num {
+    background: rgba(240, 108, 0, 0.12);
+    border-color: var(--orange-bright);
+    color: var(--orange-bright);
+    box-shadow: 0 0 22px rgba(240, 108, 0, 0.22);
+  }
+  .section.section-active .section-title em {
+    text-shadow: 0 0 30px rgba(255, 138, 28, 0.32);
+  }
 
   /* ============ ZIGZAG PROGRESS LINE ============ */
   .progress-track {
@@ -605,22 +707,76 @@
     background: #0E0E11;
     overflow: hidden;
   }
-  .map-svg {
+  .map-image {
     width: 100%;
     height: 100%;
+    object-fit: cover;
     display: block;
+    filter: contrast(1.1) brightness(0.9);
   }
-  .map-pin {
-    animation: pinPulse 2s infinite ease-in-out;
-    transform-origin: center;
+  .map-overlay {
+    position: absolute;
+    top: 68%;
+    left: 38%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 10;
+    pointer-events: none;
   }
-  @keyframes pinPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+  .map-overlay-pin {
+    width: 48px;
+    height: 48px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .map-ring {
+  .map-overlay-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--orange);
     animation: ringPulse 2.5s infinite ease-out;
-    transform-origin: center;
+  }
+  .map-overlay-ring:nth-child(2) {
+    animation-delay: 1.25s;
+  }
+  .map-overlay-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--orange);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .map-overlay-dot::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--orange);
+  }
+  .map-overlay-card {
+    background: rgba(11, 11, 13, 0.92);
+    border: 1px solid var(--orange);
+    border-radius: 8px;
+    padding: 14px 18px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .map-card-title {
+    font-family: var(--serif);
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .map-card-text {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--text-dim);
   }
   @keyframes ringPulse {
     0% { transform: scale(0.4); opacity: 0.9; }
@@ -638,13 +794,26 @@
     background: var(--bg-2);
     border: 1px solid var(--line);
     border-radius: 14px;
-    padding: 24px 26px;
+    padding: 22px 24px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 18px;
     transition: border-color 0.3s ease;
   }
   .contact-card:hover { border-color: rgba(240, 108, 0, 0.3); }
+  .contact-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--line);
+    background: var(--bg-3);
+  }
+  .contact-meta {
+    flex: 1;
+    min-width: 0;
+  }
   .contact-name {
     font-family: var(--serif);
     font-size: 22px;
@@ -659,6 +828,8 @@
     color: var(--orange-bright);
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.5px;
+    flex-shrink: 0;
+    text-decoration: none;
   }
 
   /* ============ FOOTER ============ */
@@ -743,13 +914,21 @@
     .venue-map { min-height: 300px; }
 
     .contact-card {
-      padding: 20px 22px;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
+      padding: 18px 20px;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
     }
-    .contact-name { font-size: 20px; }
-    .contact-phone { font-size: 13px; }
+    .contact-avatar { width: 48px; height: 48px; }
+    .contact-meta { flex: 1; min-width: 0; }
+    .contact-name { font-size: 19px; }
+    .contact-phone {
+      flex: 0 0 100%;
+      font-size: 13px;
+      padding-top: 12px;
+      margin-top: 4px;
+      border-top: 1px solid var(--line);
+    }
 
     .hero-meta { gap: 22px; }
     .hero-meta-value { font-size: 18px; }
@@ -780,7 +959,7 @@
   }
 
   @media (max-width: 480px) {
-    .hero { height: 200vh; } /* less scroll for the 7s clip on small phones */
+    .hero { height: 140vh; } /* tighter on small phones */
     .nav-logo img { height: 20px; }
     .nav-logo img.logo-aws { height: 24px; }
     .section { padding: 70px 18px; }
@@ -1067,7 +1246,7 @@
   <div class="hero-content" id="heroContent">
     <div class="hero-eyebrow">AWS Builder Studio · New York</div>
     <h1 class="hero-title">Harnessing a <em>generational</em><br/>tech opportunity</h1>
-    <p class="hero-sub">An immersive six-hour executive session with Sainsbury's Operating Board — exploring how AI is transforming consumer-focused industries, and how Sainsbury's can drive incremental value through it.</p>
+    <p class="hero-sub">An immersive six-hour executive session with Sainsbury's Operating Board, exploring how AI is transforming consumer-focused industries, and how Sainsbury's can drive incremental value through it.</p>
     <div class="hero-meta">
       <div class="hero-meta-item">
         <div class="hero-meta-label">Date</div>
@@ -1108,12 +1287,36 @@
     </svg>
   </div>
 
+  <!-- ============ COUNTDOWN ============ -->
+  <section class="countdown-section reveal" aria-label="Countdown to event">
+    <div class="countdown-eyebrow">Until we meet in Manhattan</div>
+    <div class="countdown-grid" id="countdown" role="timer" aria-live="off">
+      <div class="countdown-cell">
+        <div class="countdown-num" id="cd-days">00</div>
+        <div class="countdown-label">Days</div>
+      </div>
+      <div class="countdown-cell">
+        <div class="countdown-num" id="cd-hours">00</div>
+        <div class="countdown-label">Hours</div>
+      </div>
+      <div class="countdown-cell">
+        <div class="countdown-num" id="cd-mins">00</div>
+        <div class="countdown-label">Minutes</div>
+      </div>
+      <div class="countdown-cell">
+        <div class="countdown-num" id="cd-secs">00</div>
+        <div class="countdown-label">Seconds</div>
+      </div>
+    </div>
+    <div class="countdown-meta"><strong>13 May 2026 · 09:00 ET</strong> · AWS Builder Studio · New York</div>
+  </section>
+
   <!-- 01 OVERVIEW -->
   <section class="section overview" data-section="01">
     <div class="section-head reveal">
       <div class="section-num">01 · Overview</div>
-      <h2 class="section-title">A day to <em>think bigger</em> — together.</h2>
-      <p class="section-lead">On 13 May 2026, Sainsbury's Operating Board will visit the AWS Builder Studio in Manhattan for a curated executive session designed to surface where AI moves the needle for retail — and where Sainsbury's should move first.</p>
+      <h2 class="section-title">A day to <em>think bigger</em>, together.</h2>
+      <p class="section-lead">On 13 May 2026, Sainsbury's Operating Board will visit the AWS Builder Studio in Manhattan for a curated executive session designed to surface where AI moves the needle for retail, and where Sainsbury's should move first.</p>
     </div>
 
     <div class="stats-row reveal delay-1">
@@ -1137,7 +1340,7 @@
     <div class="section-head reveal">
       <div class="section-num">02 · Objectives</div>
       <h2 class="section-title">Five lenses for the day.</h2>
-      <p class="section-lead">Every session maps to at least one of these objectives — keeping the conversation grounded in outcomes Sainsbury's can act on.</p>
+      <p class="section-lead">Every session maps to at least one of these objectives, keeping the conversation grounded in outcomes Sainsbury's can act on.</p>
     </div>
 
     <div class="objectives-grid">
@@ -1154,7 +1357,7 @@
     <div class="section-head reveal">
       <div class="section-num">03 · Agenda</div>
       <h2 class="section-title">The shape of the <em>day</em>.</h2>
-      <p class="section-lead">A deliberately paced flow — opening context, retail signal, disruptor inspiration, hands-on immersion, and a closing reset on what to do next.</p>
+      <p class="section-lead">A deliberately paced flow: opening context, retail signal, disruptor inspiration, hands-on immersion, and a closing reset on what to do next.</p>
     </div>
 
     <div class="agenda-list">
@@ -1168,7 +1371,7 @@
         <div class="agenda-time"><small>09:30 – 10:00</small>Opening</div>
         <div>
           <div class="agenda-title-row">Welcome and Scene Setting</div>
-          <div class="agenda-desc">Why we've pulled this day together. A pan-Amazon perspective on where AI is moving in retail, combined with the speed of delivery and understanding of retail margins your account team brings every day — the frame for everything that follows.</div>
+          <div class="agenda-desc">Why we've pulled this day together. A pan-Amazon perspective on where AI is moving in retail, combined with the speed of delivery and understanding of retail margins your account team brings every day. The frame for everything that follows.</div>
         </div>
         <div class="agenda-presenter"><span>Hosted by</span>Duncan Stewart<br/>James Wilkinson</div>
       </div>
@@ -1192,7 +1395,7 @@
         <div class="agenda-time"><small>10:50 – 11:30</small>Session 2</div>
         <div>
           <div class="agenda-title-row">Operations at Scale: Lessons from Amazon</div>
-          <div class="agenda-desc">Amazon Retail leaders share how AI and automation have been applied across fulfilment, last-mile, logistics networks and Amazon Fresh. A front-to-spine operational conversation — what's worked, what hasn't, and the impact on availability, waste and workforce productivity.</div>
+          <div class="agenda-desc">Amazon Retail leaders share how AI and automation have been applied across fulfilment, last-mile, logistics networks and Amazon Fresh. A front-to-spine operational conversation: what's worked, what hasn't, and the impact on availability, waste and workforce productivity.</div>
         </div>
         <div class="agenda-presenter"><span>Speaker</span>Sophie Turrell<br/><em style="color:var(--text-dim);font-style:normal;font-size:12px">Director, Amazon NA Grocery Partnerships</em></div>
       </div>
@@ -1201,7 +1404,7 @@
         <div class="agenda-time"><small>11:30 – 12:10</small>Session 3</div>
         <div>
           <div class="agenda-title-row">Inspiration from the Disruptors</div>
-          <div class="agenda-desc">How tech-native, AI-first companies operate differently. External voice: an AWS partner — potentially an industry expert from Anthropic on where frontier AI is heading and what it means for retail.</div>
+          <div class="agenda-desc">How tech-native, AI-first companies operate differently. External voice: an AWS partner, potentially an industry expert from Anthropic on where frontier AI is heading and what it means for retail.</div>
         </div>
         <div class="agenda-presenter"><span>Speaker</span>AWS Partner Speaker<br/><em style="color:var(--text-dim);font-style:normal;font-size:12px">TBC</em></div>
       </div>
@@ -1213,10 +1416,10 @@
       </div>
 
       <div class="agenda-row is-headline reveal">
-        <div class="agenda-time"><small>13:00 – 13:45</small>Main Event</div>
+        <div class="agenda-time"><small>13:00 – 13:45</small>Builder Studio</div>
         <div>
           <div class="agenda-title-row">AWS Builder Studio: Immersive Hands-on Experience</div>
-          <div class="agenda-desc">The centrepiece of the day. The AWS Builder Studio is an 8,000 sq ft immersive innovation space in the heart of Manhattan, where business and technology leaders experience cutting-edge AWS capabilities through interactive demonstrations. The Operating Board will move through three live demo stations, guided by AWS experts.</div>
+          <div class="agenda-desc">The AWS Builder Studio is an 8,000 sq ft immersive innovation space in the heart of Manhattan, where business and technology leaders experience cutting-edge AWS capabilities through interactive demonstrations. The Operating Board will move through three live demo stations, guided by AWS experts.</div>
         </div>
         <div class="agenda-presenter"><span>Hosts</span>Chris Cassin<br/>Reed Fodge<br/>Danny Mason</div>
       </div>
@@ -1224,8 +1427,8 @@
       <div class="agenda-row reveal">
         <div class="agenda-time"><small>13:45 – 15:00</small>Session 4</div>
         <div>
-          <div class="agenda-title-row">Innovating for the Customer</div>
-          <div class="agenda-desc">Including a live demo. Updated abstract to follow.</div>
+          <div class="agenda-title-row">Agentic Commerce: Lessons from Amazon Rufus</div>
+          <div class="agenda-desc">The way consumers shop is being fundamentally reshaped by AI. This session presents AWS's perspective on agentic commerce and how conversational agents are transforming the shopping journey. Drawing on data and lessons learned from Amazon Rufus, we show what works in production and how AWS is helping retailers bring conversational shopping experiences to life for their customers.</div>
         </div>
         <div class="agenda-presenter"><span>Speakers</span>Todd Carter<br/>Nick Tyson</div>
       </div>
@@ -1240,7 +1443,7 @@
         <div class="agenda-time"><small>15:15 – 15:45</small>Session 5</div>
         <div>
           <div class="agenda-title-row">AI Transformation and the Operating Model</div>
-          <div class="agenda-desc">What AI adoption means for how work gets done — roles, processes, accountability and pace of change. Connects to the accountability and autonomy model already being driven inside Sainsbury's.</div>
+          <div class="agenda-desc">What AI adoption means for how work gets done: roles, processes, accountability and pace of change. Connects to the accountability and autonomy model already being driven inside Sainsbury's.</div>
         </div>
         <div class="agenda-presenter"><span>Speaker</span>Dwayne Browne<br/><em style="color:var(--text-dim);font-style:normal;font-size:12px">AWS Principal WW Data & AI Strategist</em></div>
       </div>
@@ -1261,14 +1464,14 @@
     <div class="section-head reveal">
       <div class="section-num">04 · Builder Studio</div>
       <h2 class="section-title">Three live <em>demo stations</em>.</h2>
-      <p class="section-lead">During the main event, the board moves through three immersive demonstrations — guided, hands-on, and built to spark "what if Sainsbury's…" conversations.</p>
+      <p class="section-lead">During the main event, the board moves through three immersive demonstrations, guided, hands-on, and built to spark "what if Sainsbury's…" conversations.</p>
     </div>
 
     <div class="demo-grid">
       <div class="demo-card reveal">
         <div class="demo-icon">P</div>
         <div class="demo-name">Proto-Luna</div>
-        <div class="demo-desc">A holographic display featuring lifelike AWS executive avatars — showcasing the future of remote communication and AI-powered presentations.</div>
+        <div class="demo-desc">A holographic display featuring lifelike AWS executive avatars, showcasing the future of remote communication and AI-powered presentations.</div>
       </div>
       <div class="demo-card reveal delay-1">
         <div class="demo-icon">F</div>
@@ -1278,7 +1481,7 @@
       <div class="demo-card reveal delay-2">
         <div class="demo-icon">M</div>
         <div class="demo-name">Mino & Mosaic</div>
-        <div class="demo-desc">Next-generation content creation with generative AI — visual and written content produced at unprecedented speed.</div>
+        <div class="demo-desc">Next-generation content creation with generative AI: visual and written content produced at unprecedented speed.</div>
       </div>
     </div>
   </section>
@@ -1300,7 +1503,7 @@
           <li><strong>Sam Burston</strong><span>Director of Business Strategy & Planning</span></li>
           <li><strong>Claire Pickthall</strong><span>Director of Retail, Omnichannel & Logistics Transformation</span></li>
           <li><strong>Mark Given</strong><span>Chief Technology, Marketing and Data Officer</span></li>
-          <li><strong>James Leech</strong><span>Director of Technology — Channels, People & Property</span></li>
+          <li><strong>James Leech</strong><span>Director of Technology, Channels, People & Property</span></li>
           <li><strong>Andy Hill</strong><span>Chief Data Officer</span></li>
           <li><strong>Bláthnaid Bergin</strong><span>Chief Financial Officer</span></li>
         </ul>
@@ -1328,7 +1531,7 @@
     <div class="section-head reveal">
       <div class="section-num">06 · Venue</div>
       <h2 class="section-title">Midtown Manhattan.</h2>
-      <p class="section-lead">The AWS Builder Studio sits between Bryant Park and Times Square — eight thousand square feet of immersive innovation space.</p>
+      <p class="section-lead">The AWS Builder Studio sits between Bryant Park and Times Square, eight thousand square feet of immersive innovation space.</p>
     </div>
 
     <div class="venue-block reveal">
@@ -1350,83 +1553,19 @@
         </div>
       </div>
       <div class="venue-map">
-        <svg class="map-svg" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-          <!-- Background grid suggesting Manhattan blocks -->
-          <defs>
-            <pattern id="blocks" x="0" y="0" width="80" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(-15)">
-              <rect x="0" y="0" width="80" height="40" fill="#13131a"/>
-              <rect x="3" y="3" width="74" height="34" fill="#1c1c25" stroke="#26262f" stroke-width="0.5"/>
-            </pattern>
-            <radialGradient id="mapGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="rgba(240,108,0,0.25)"/>
-              <stop offset="100%" stop-color="rgba(240,108,0,0)"/>
-            </radialGradient>
-            <linearGradient id="parkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#2a3a1f"/>
-              <stop offset="100%" stop-color="#1f2a18"/>
-            </linearGradient>
-          </defs>
-          <rect width="600" height="600" fill="url(#blocks)"/>
-
-          <!-- Bryant Park rectangle -->
-          <g transform="rotate(-15 360 380)">
-            <rect x="290" y="350" width="140" height="60" fill="url(#parkGrad)" rx="4"/>
-            <text x="360" y="385" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#7a8a5f" letter-spacing="1">BRYANT PARK</text>
-          </g>
-
-          <!-- Streets (rotated grid) -->
-          <g stroke="#2e2e38" stroke-width="2" transform="rotate(-15 300 300)">
-            <line x1="-100" y1="120" x2="800" y2="120"/>
-            <line x1="-100" y1="200" x2="800" y2="200"/>
-            <line x1="-100" y1="280" x2="800" y2="280"/>
-            <line x1="-100" y1="360" x2="800" y2="360"/>
-            <line x1="-100" y1="440" x2="800" y2="440"/>
-            <line x1="-100" y1="520" x2="800" y2="520"/>
-            <line x1="120" y1="-100" x2="120" y2="700"/>
-            <line x1="200" y1="-100" x2="200" y2="700"/>
-            <line x1="280" y1="-100" x2="280" y2="700"/>
-            <line x1="360" y1="-100" x2="360" y2="700"/>
-            <line x1="440" y1="-100" x2="440" y2="700"/>
-            <line x1="520" y1="-100" x2="520" y2="700"/>
-          </g>
-
-          <!-- Highlighted street: West 39th -->
-          <g stroke="#3d3d4a" stroke-width="3" transform="rotate(-15 300 300)">
-            <line x1="-100" y1="280" x2="800" y2="280" stroke="#5a4a32"/>
-          </g>
-
-          <!-- Glow under pin -->
-          <circle cx="300" cy="270" r="120" fill="url(#mapGlow)"/>
-
-          <!-- Pulsing rings -->
-          <g transform="translate(300 270)">
-            <circle class="map-ring" r="24" fill="none" stroke="#FF8A1C" stroke-width="2" opacity="0.6"/>
-            <circle class="map-ring" r="24" fill="none" stroke="#FF8A1C" stroke-width="2" opacity="0.6" style="animation-delay:1.25s"/>
-          </g>
-
-          <!-- Pin -->
-          <g class="map-pin" transform="translate(300 270)">
-            <circle r="14" fill="#0B0B0D" stroke="#FF8A1C" stroke-width="2.5"/>
-            <circle r="6" fill="#FF8A1C"/>
-          </g>
-
-          <!-- Address callout -->
-          <g transform="translate(330 250)">
-            <line x1="0" y1="20" x2="60" y2="-30" stroke="#FF8A1C" stroke-width="1" stroke-dasharray="2 3"/>
-            <rect x="60" y="-58" width="190" height="56" rx="8" fill="rgba(11,11,13,0.92)" stroke="#FF8A1C" stroke-width="1"/>
-            <text x="74" y="-38" font-family="Instrument Serif,serif" font-size="14" fill="#F5F2EE">AWS Builder Studio</text>
-            <text x="74" y="-22" font-family="Inter,sans-serif" font-size="11" fill="#9B958E">12 West 39th Street</text>
-            <text x="74" y="-8" font-family="Inter,sans-serif" font-size="11" fill="#9B958E">New York, NY 10018</text>
-          </g>
-
-          <!-- Compass -->
-          <g transform="translate(540 60)">
-            <circle r="22" fill="rgba(11,11,13,0.7)" stroke="#3d3d4a" stroke-width="1"/>
-            <path d="M 0 -14 L 4 0 L 0 4 L -4 0 Z" fill="#FF8A1C"/>
-            <path d="M 0 14 L 4 0 L 0 -4 L -4 0 Z" fill="#5a5a68"/>
-            <text y="-26" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#9B958E" letter-spacing="2">N</text>
-          </g>
-        </svg>
+        <img src="map.png" alt="Map of Midtown Manhattan" class="map-image" />
+        <div class="map-overlay">
+          <div class="map-overlay-pin">
+            <div class="map-overlay-ring"></div>
+            <div class="map-overlay-ring"></div>
+            <div class="map-overlay-dot"></div>
+          </div>
+          <div class="map-overlay-card">
+            <div class="map-card-title">AWS Builder Studio</div>
+            <div class="map-card-text">12 West 39th Street</div>
+            <div class="map-card-text">New York, NY 10018</div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -1436,33 +1575,37 @@
     <div class="section-head reveal">
       <div class="section-num">07 · Contacts</div>
       <h2 class="section-title">On the day.</h2>
-      <p class="section-lead">Key contacts from the Sainsbury's AWS Account Team — for anything you need before, during, or after the session.</p>
+      <p class="section-lead">Key contacts from the Sainsbury's AWS Account Team, for anything you need before, during, or after the session.</p>
     </div>
 
     <div class="contacts-grid">
       <div class="contact-card reveal">
-        <div>
+        <img class="contact-avatar" src="james.png" alt="James Wilkinson" />
+        <div class="contact-meta">
           <div class="contact-name">James Wilkinson</div>
           <div class="contact-role">AWS Principal Account Manager</div>
         </div>
         <a class="contact-phone" href="tel:+447887528165">+44 7887 528 165</a>
       </div>
       <div class="contact-card reveal delay-1">
-        <div>
+        <img class="contact-avatar" src="duncan.png" alt="Duncan Stewart" />
+        <div class="contact-meta">
           <div class="contact-name">Duncan Stewart</div>
           <div class="contact-role">AWS UKI Retail & CPG Industry Lead</div>
         </div>
-        <a class="contact-phone" href="#">+44</a>
+        <a class="contact-phone" href="tel:+447769953497">+44 7769 953 497</a>
       </div>
       <div class="contact-card reveal delay-2">
-        <div>
+        <img class="contact-avatar" src="nick.png" alt="Nick Tyson" />
+        <div class="contact-meta">
           <div class="contact-name">Nick Tyson</div>
           <div class="contact-role">AWS Senior Solution Architect</div>
         </div>
         <a class="contact-phone" href="tel:+447887441807">+44 7887 441 807</a>
       </div>
       <div class="contact-card reveal delay-3">
-        <div>
+        <img class="contact-avatar" src="geetha.png" alt="Geetha Elliott" />
+        <div class="contact-meta">
           <div class="contact-name">Geetha Elliott</div>
           <div class="contact-role">AWS Senior Customer Solutions Manager</div>
         </div>
@@ -1483,6 +1626,28 @@
 </footer>
 
 <script>
+  // ============ COUNTDOWN ============
+  // 13 May 2026, 09:00 ET (EDT in May = UTC-4 = 13:00 UTC)
+  const EVENT_TS = new Date('2026-05-13T13:00:00Z').getTime();
+  const cdDays  = document.getElementById('cd-days');
+  const cdHours = document.getElementById('cd-hours');
+  const cdMins  = document.getElementById('cd-mins');
+  const cdSecs  = document.getElementById('cd-secs');
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function tickCountdown() {
+    let diff = Math.max(0, EVENT_TS - Date.now());
+    const days = Math.floor(diff / 86400000); diff -= days * 86400000;
+    const hours = Math.floor(diff / 3600000); diff -= hours * 3600000;
+    const mins  = Math.floor(diff / 60000);   diff -= mins * 60000;
+    const secs  = Math.floor(diff / 1000);
+    if (cdDays)  cdDays.textContent  = pad2(days);
+    if (cdHours) cdHours.textContent = pad2(hours);
+    if (cdMins)  cdMins.textContent  = pad2(mins);
+    if (cdSecs)  cdSecs.textContent  = pad2(secs);
+  }
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
+
   // ============ PASSWORD GATE ============
   // Default password: "manhattan2026" (case-insensitive on entry)
   // To change: replace GATE_HASH with sha256 of your new password.
@@ -1626,32 +1791,14 @@
     window.addEventListener(evt, primeVideo, { once: false, passive: true });
   });
 
-  // Per-frame, advance currentTime toward targetTime — but never faster than the
-  // video's natural 1x playback rate. So fast scrolls don't fly through the clip:
-  // the video keeps playing at real speed and "catches up" to the scroll position.
-  const MAX_RATE = 1.0; // multiples of original speed (1.0 = real-time)
-  let lastFrameTime = performance.now();
-
   function tickVideo() {
-    const now = performance.now();
-    // dt in seconds, capped to avoid huge jumps after a tab is backgrounded
-    const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
-    lastFrameTime = now;
-
-    if (videoReady) {
-      const maxStep = MAX_RATE * dt;
-      const delta = targetTime - currentTime;
-
-      if (Math.abs(delta) <= maxStep) {
-        // Close enough — snap to target so slow scrolls feel exactly attached
-        currentTime = targetTime;
-      } else {
-        // Too far — advance at the rate cap (forward or reverse)
-        currentTime += Math.sign(delta) * maxStep;
-      }
+    if (videoReady && videoDuration > 0) {
+      // Smoothly interpolate currentTime to targetTime
+      currentTime += (targetTime - currentTime) * 0.08;
 
       try {
-        if (Math.abs(heroVideoEl.currentTime - currentTime) > 0.01) {
+        // Only update if difference is noticeable, to prevent micro-stutters
+        if (Math.abs(heroVideoEl.currentTime - currentTime) > 0.03) {
           heroVideoEl.currentTime = Math.max(0, Math.min(currentTime, videoDuration - 0.05));
         }
       } catch (e) { /* seeking errors are non-fatal */ }
@@ -1661,11 +1808,12 @@
   tickVideo();
 
   function onScroll() {
-    const y = window.scrollY;
+    let y = window.scrollY;
     const vh = window.innerHeight;
-    const heroLen = heroSection.offsetHeight - vh; // distance scrollable while hero is in view
+    const heroLen = Math.max(1, heroSection.offsetHeight - vh); // distance scrollable while hero is in view
+
     // 0..1 progress through the hero scroll zone
-    const heroProgress = heroLen > 0 ? Math.max(0, Math.min(y / heroLen, 1)) : 0;
+    const heroProgress = Math.max(0, Math.min(y / heroLen, 1));
 
     // Drive video time directly from scroll
     if (videoReady && videoDuration > 0) {
@@ -1673,15 +1821,20 @@
       targetTime = heroProgress * (videoDuration - 0.05);
     }
 
-    // Hero content fades out in the last 40% of hero scroll
-    const contentOpacity = Math.max(0, 1 - Math.max(0, heroProgress - 0.35) / 0.5);
-    const contentLift = Math.max(0, heroProgress - 0.35) * -60;
+    // Title fade follows ACTUAL video progress, not scroll progress. On a slow
+    // scroll the two are identical; on a fast scroll the video lags behind due
+    // to the 1x rate cap, and we want the title to lag with it — so the locked
+    // period reads as "the video is finishing playing" rather than a dead page.
+    const videoProgress = (videoReady && videoDuration > 0)
+      ? Math.min(1, currentTime / videoDuration)
+      : heroProgress;
+    const contentOpacity = Math.max(0, 1 - Math.max(0, videoProgress - 0.2) / 0.4);
+    const contentLift = Math.max(0, videoProgress - 0.2) * -60;
     heroContent.style.opacity = contentOpacity;
     heroContent.style.transform = `translateY(${contentLift}px)`;
 
-    // Video pin fades out at the very end of hero scroll so main content takes over cleanly
-    const videoOpacity = Math.max(0, 1 - Math.max(0, heroProgress - 0.85) / 0.15);
-    heroVideo.style.opacity = videoOpacity;
+    // Don't fade the video — the main content slides up and covers it naturally.
+    heroVideo.style.opacity = 1;
 
     // Scroll cue hides as soon as user starts scrolling (don't override the entry animation)
     if (scrollCue && y > 5) scrollCue.style.opacity = Math.max(0, 1 - heroProgress * 4);
@@ -1691,6 +1844,21 @@
     else nav.classList.remove('scrolled');
 
     updateProgressLine();
+    updateActiveSection();
+  }
+
+  // ============ ACTIVE SECTION HIGHLIGHT ============
+  function updateActiveSection() {
+    const triggerY = window.scrollY + window.innerHeight * 0.55;
+    const sections = main ? main.querySelectorAll('.section') : [];
+    let active = null;
+    sections.forEach(s => {
+      const rect = s.getBoundingClientRect();
+      const top = rect.top + window.scrollY;
+      const bottom = top + rect.height;
+      if (triggerY >= top && triggerY < bottom) active = s;
+    });
+    sections.forEach(s => s.classList.toggle('section-active', s === active));
   }
 
   // ============ REVEAL ON SCROLL ============
