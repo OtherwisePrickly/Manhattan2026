@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -567,6 +568,17 @@
     color: var(--text-dim);
     margin-bottom: 6px;
   }
+  .agenda-lens {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 4px 10px;
+    background: rgba(240, 108, 0, 0.08);
+    color: var(--orange-bright);
+    border: 1px solid rgba(240, 108, 0, 0.2);
+    border-radius: 4px;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
 
   /* ============ DEMO STATIONS ============ */
   .demo-grid {
@@ -834,6 +846,9 @@
 
   /* ============ FOOTER ============ */
   footer {
+    position: relative;
+    z-index: 5;
+    background: var(--bg);
     border-top: 1px solid var(--line);
     padding: 60px 40px;
     text-align: center;
@@ -1381,6 +1396,7 @@
         <div>
           <div class="agenda-title-row">AI Transformation of Consumer Industries</div>
           <div class="agenda-desc">AWS view on AI reshaping retail globally, combined with Amazon's applied AI across fulfilment, last-mile, logistics and Fresh. ROI metrics, cost savings, and supply-chain data points.</div>
+          <div class="agenda-lens">Answers objective 1</div>
         </div>
         <div class="agenda-presenter"><span>Speaker</span>Aparna Galiasso<br/><em style="color:var(--text-dim);font-style:normal;font-size:12px">AWS NA Retail Industry Lead</em></div>
       </div>
@@ -1396,6 +1412,7 @@
         <div>
           <div class="agenda-title-row">Operations at Scale: Lessons from Amazon</div>
           <div class="agenda-desc">Amazon Retail leaders share how AI and automation have been applied across fulfilment, last-mile, logistics networks and Amazon Fresh. A front-to-spine operational conversation: what's worked, what hasn't, and the impact on availability, waste and workforce productivity.</div>
+          <div class="agenda-lens">Answers objective 2</div>
         </div>
         <div class="agenda-presenter"><span>Speaker</span>Sophie Turrell<br/><em style="color:var(--text-dim);font-style:normal;font-size:12px">Director, Amazon NA Grocery Partnerships</em></div>
       </div>
@@ -1405,6 +1422,7 @@
         <div>
           <div class="agenda-title-row">Inspiration from the Disruptors</div>
           <div class="agenda-desc">How tech-native, AI-first companies operate differently. External voice: an AWS partner, potentially an industry expert from Anthropic on where frontier AI is heading and what it means for retail.</div>
+          <div class="agenda-lens">Answers objective 3</div>
         </div>
         <div class="agenda-presenter"><span>Speaker</span>AWS Partner Speaker<br/><em style="color:var(--text-dim);font-style:normal;font-size:12px">TBC</em></div>
       </div>
@@ -1420,6 +1438,7 @@
         <div>
           <div class="agenda-title-row">AWS Builder Studio: Immersive Hands-on Experience</div>
           <div class="agenda-desc">The AWS Builder Studio is an 8,000 sq ft immersive innovation space in the heart of Manhattan, where business and technology leaders experience cutting-edge AWS capabilities through interactive demonstrations. The Operating Board will move through three live demo stations, guided by AWS experts.</div>
+          <div class="agenda-lens" style="background:rgba(240,108,0,0.15);border-color:rgba(240,108,0,0.4);">Answers objectives 1–5</div>
         </div>
         <div class="agenda-presenter"><span>Hosts</span>Chris Cassin<br/>Reed Fodge<br/>Danny Mason</div>
       </div>
@@ -1429,6 +1448,7 @@
         <div>
           <div class="agenda-title-row">Agentic Commerce: Lessons from Amazon Rufus</div>
           <div class="agenda-desc">The way consumers shop is being fundamentally reshaped by AI. This session presents AWS's perspective on agentic commerce and how conversational agents are transforming the shopping journey. Drawing on data and lessons learned from Amazon Rufus, we show what works in production and how AWS is helping retailers bring conversational shopping experiences to life for their customers.</div>
+          <div class="agenda-lens">Answers objective 5</div>
         </div>
         <div class="agenda-presenter"><span>Speakers</span>Todd Carter<br/>Nick Tyson</div>
       </div>
@@ -1444,6 +1464,7 @@
         <div>
           <div class="agenda-title-row">AI Transformation and the Operating Model</div>
           <div class="agenda-desc">What AI adoption means for how work gets done: roles, processes, accountability and pace of change. Connects to the accountability and autonomy model already being driven inside Sainsbury's.</div>
+          <div class="agenda-lens">Answers objective 4</div>
         </div>
         <div class="agenda-presenter"><span>Speaker</span>Dwayne Browne<br/><em style="color:var(--text-dim);font-style:normal;font-size:12px">AWS Principal WW Data & AI Strategist</em></div>
       </div>
@@ -1453,6 +1474,7 @@
         <div>
           <div class="agenda-title-row">Wrap-up and Next Steps</div>
           <div class="agenda-desc">Reflections on the day, key takeaways, and agreed next steps for Sainsbury's AI journey.</div>
+          <div class="agenda-lens">Covers all five objectives</div>
         </div>
         <div class="agenda-presenter"><span>Closing</span>James Wilkinson<br/>Duncan Stewart<br/>Rob Barnes</div>
       </div>
